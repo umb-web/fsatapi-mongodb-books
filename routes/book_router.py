@@ -16,28 +16,28 @@ book_rt = APIRouter()
 @book_rt.get("/books")
 def get_books():
     books = get_books_s()
-    return JSONResponse(content=books, status_code=status.HTTP_200_OK)
+    return books
 
 
 @book_rt.get("/books/{id}")
 def get_book(id: str):
     book = get_book_s(id)
-    return JSONResponse(content=book, status_code=status.HTTP_200_OK)
+    return book
 
 
 @book_rt.post("/books")
 def post_book(book: Book):
     res = create_book_s(book)
-    return JSONResponse(content=res, status_code=status.HTTP_201_CREATED)
+    return res
 
 
 @book_rt.put("/books/{id}")
 def update_book(id: str, book: Book):
     res = update_book_s(id, book)
-    return JSONResponse(content=res, status_code=status.HTTP_201_CREATED)
+    return res
 
 
 @book_rt.delete("/books/{id}")
 def delete_book(id: str):
     res = delete_book_s(id)
-    return JSONResponse(content=res, status_code=status.HTTP_200_OK)
+    return res

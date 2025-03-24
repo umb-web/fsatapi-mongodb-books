@@ -1,14 +1,18 @@
 from db.database import database
 from bson import ObjectId
 from models.models import Book
-from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
+from fastapi import status
 
 
 def create_book_s(book: Book):
     collection = database.get_collection("books")
     book_dict = book.dict()
     r = collection.insert_one(book_dict)
-    return {"id": str(r.inserted_id), "content": str(book_dict)}
+    return JSONResponse(
+        content={"id": str(r.inserted_id), "content": str(book_dict)},
+        status_code=status.HTTP_201_CREATED,
+    )
 
 
 def get_book_s(id: str):
@@ -16,7 +20,9 @@ def get_book_s(id: str):
     try:
         ob_id = ObjectId(id)
     except:
-        return None
+        return JSONResponse(
+            content={"message": "book not found"}, status_code=status.HTTP_404_NOT_FOUND
+        )
 
     book = collection.find_one({"_id": ob_id})
 
@@ -42,14 +48,21 @@ def update_book_s(id: str, book: Book):
             updated_data[k] = v
 
     if not updated_data:
-        return {"message": "no data to update"}
+        return JSONResponse(
+            content={"message": "no data to update"}, status_code=status.HTTP_200_OK
+        )
 
-    res = collection.update_one({"_id": ObjectId(id)}, {"$set": updated_data})
+    try:
+        res = collection.update_one({"_id": ObjectId(id)}, {"$set": updated_data})
+    except Exception as e:
+        return JSONResponse(
+            content={"message": "book not found"}, status_code=status.HTTP_404_NOT_FOUND
+        )
 
-    if res.matched_count == 0:
-        return {"message": "book not found"}
-
-    return {"message": "book updated", "content": str(updated_data)}
+    return JSONResponse(
+        content={"message": "book updated", "content": str(updated_data)},
+        status_code=status.HTTP_201_CREATED,
+    )
 
 
 def delete_book_s(id: str):
@@ -58,10 +71,9 @@ def delete_book_s(id: str):
 
     try:
         res = collection.delete_one({"_id": ObjectId(id)})
-        if res.deleted_count == 0:
-            return {"message": "book not found"}
-    except Exception as e:
-        return {"message": f"error {str(e)}"}
-    return {
-        "deleted": str(book),
-    }
+    except Exception:
+        return JSONResponse(
+            content={"message": "book not found"},
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+    return JSONResponse(content={"deleted": str(book)}, status_code=status.HTTP_200_OK)
