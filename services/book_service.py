@@ -53,8 +53,8 @@ def update_book_s(id: str, book: Book):
         )
 
     try:
-        res = collection.update_one({"_id": ObjectId(id)}, {"$set": updated_data})
-    except Exception as e:
+        collection.update_one({"_id": ObjectId(id)}, {"$set": updated_data})
+    except Exception:
         return JSONResponse(
             content={"message": "book not found"}, status_code=status.HTTP_404_NOT_FOUND
         )
@@ -70,7 +70,7 @@ def delete_book_s(id: str):
     book = get_book_s(id)
 
     try:
-        res = collection.delete_one({"_id": ObjectId(id)})
+        collection.delete_one({"_id": ObjectId(id)})
     except Exception:
         return JSONResponse(
             content={"message": "book not found"},
