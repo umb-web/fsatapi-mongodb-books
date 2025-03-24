@@ -1,29 +1,43 @@
-from fastapi import APIRouter
-
+from fastapi import APIRouter, status
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
+from services.book_service import (
+    get_book_s,
+    get_books_s,
+    delete_book_s,
+    update_book_s,
+    create_book_s,
+)
+from models.models import Book
 
 book_rt = APIRouter()
 
 
-@book_rt.get("/books/{id}")
-def get_books():
-    pass
-
-
 @book_rt.get("/books")
-def get_book():
-    pass
+def get_books():
+    books = get_books_s()
+    return JSONResponse(content=books, status_code=status.HTTP_200_OK)
+
+
+@book_rt.get("/books/{id}")
+def get_book(id: str):
+    book = get_book_s(id)
+    return JSONResponse(content=book, status_code=status.HTTP_200_OK)
 
 
 @book_rt.post("/books")
-def post_book():
-    pass
+def post_book(book: Book):
+    res = create_book_s(book)
+    return JSONResponse(content=res, status_code=status.HTTP_201_CREATED)
 
 
 @book_rt.put("/books/{id}")
-def update_book():
-    pass
+def update_book(id: str, book: Book):
+    res = update_book_s(id, book)
+    return JSONResponse(content=res, status_code=status.HTTP_201_CREATED)
 
 
 @book_rt.delete("/books/{id}")
-def delete_book():
-    pass
+def delete_book(id: str):
+    res = delete_book_s(id)
+    return JSONResponse(content=res, status_code=status.HTTP_200_OK)
